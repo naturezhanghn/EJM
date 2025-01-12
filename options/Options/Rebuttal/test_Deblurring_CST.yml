@@ -1,0 +1,51 @@
+# general settings
+name: test_Deblurring_CST_20231105_480x640Dv1plus20uv_nowarp
+model_type: ImageMlossModel
+scale: 1
+num_gpu: 1  # set num_gpu: 0 for cpu mode
+manual_seed: 100
+
+# dataset and data loader settings
+datasets:
+  test:
+    name: ValSet
+    type: REMOTEDATASetNoWarp
+    dataroot_gt: /data2/chenzd/TDI_dataset_td_2023_04_18_480x640Dv1_plus_20_uv/TDI_dataset_td/tdi_dataset/val
+    io_backend:
+      type: disk
+
+network_g:
+  type: CST
+  num_blocks: [2,4,6]
+  sparse: False
+
+# path
+path:
+  pretrain_network_g: /raid/chenzd/project/restore_sateline/experiments/Deblurring_CST_20231103_480x640Dv1plus20uv_nowarp/models/net_g_450000.pth
+  strict_load_g: true
+  resume_state: ~
+
+
+# validation settings
+val:
+  save_img: false
+  use_image: false # for GMSD evaluation
+  grids: true
+  crop_size: 128
+
+  metrics:
+    gmsd: # metric name, can be arbitrary
+      type: calculate_gmsd # fsim2 #calculate_fsim
+    # psnr:
+    #   type: calculate_psnr
+    #   crop_border: 0
+    #   test_y_channel: false
+    # ssim:
+    #   type: calculate_ssim
+    #   crop_border: 0
+    #   test_y_channel: false
+
+# dist training settings
+dist_params:
+  backend: nccl
+  port: 29500

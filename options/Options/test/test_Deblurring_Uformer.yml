@@ -1,0 +1,57 @@
+# general settings
+name: test_Deblurring_Uformer_20230810_480x640Dv1plus20uv_nowarp_gmsd
+model_type: ImageMlossModel
+scale: 1
+num_gpu: 1  # set num_gpu: 0 for cpu mode
+manual_seed: 100
+
+# dataset and data loader settings
+datasets:
+  test:
+    name: ValSet
+    type: REMOTEDATASetNoWarp
+    # dataroot_gt: /data2/chenzd/TDI_dataset_td_2023_04_18_480x640Dv1_plus_20_uv/TDI_dataset_td/tdi_dataset/val
+    dataroot_gt: /raid/chenzd/dataset/val2
+    io_backend:
+      type: disk
+
+network_g:
+  type: Uformer
+  img_size: 128
+  in_chans: 1
+  dd_in: 1
+  embed_dim: 32
+  depths: [1, 2, 8, 8, 2, 8, 8, 2, 1]
+  modulator: true
+
+# path
+path:
+  pretrain_network_g: /raid/chenzd/project/restore_sateline/experiments/Deblurring_Uformer_20230730_LAP_nowarp/models/net_g_450000.pth
+  strict_load_g: true
+  resume_state: ~
+
+# validation settings
+val:
+  save_img: False
+  use_image: true # a litte different from true in PSNR and SSIM, we apply true for PSNR and SSIM, and false for gmsd(otherwise error occurs)
+  grids: true
+  crop_size: 128
+
+  metrics:
+    psnr: # metric name, can be arbitrary
+      type: calculate_psnr
+      crop_border: 0
+      test_y_channel: false
+    ssim: # metric name, can be arbitrary
+      type: calculate_ssim
+      crop_border: 0
+      test_y_channel: false
+    # gmsd: # metric name, can be arbitrary
+    #   type: calculate_gmsd # fsim2 #calculate_fsim
+    # fsim: # metric name, can be arbitrary
+    #   type: fsim2 # fsim2 #calculate_fsim
+
+# dist training settings
+dist_params:
+  backend: nccl
+  port: 29500
